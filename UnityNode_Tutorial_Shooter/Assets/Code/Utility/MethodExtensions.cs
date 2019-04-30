@@ -10,5 +10,10 @@ namespace Project.Utility
         {
             return Value.Replace("\"", "");
         }
+
+        public static float TwoDecimals(this float value)
+        {
+            return Mathf.Round(value * 1000.0f) / 1000.0f;
+        }
     }
 }

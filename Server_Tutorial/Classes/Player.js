@@ -6,7 +6,7 @@ module.exports = class Player {
     this.username = '';
     this.id = shortID.generate();
     this.position = new Vector2();
-    this.position.x = 0;
-    this.position.y = 0;
+    this.tankRotation = 0;
+    this.barrelRotation = 0;
   }
 };

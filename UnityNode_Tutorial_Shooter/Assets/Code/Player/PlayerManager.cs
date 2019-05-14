@@ -35,7 +35,7 @@ namespace Project.Player
 
         private void Start()
         {
-            shootingCooldown = new Cooldown(1);
+            shootingCooldown = new Cooldown(0.2f);
             bulletData = new BulletData();
         }
 
@@ -90,6 +90,7 @@ namespace Project.Player
                 shootingCooldown.StartCoolDown();
 
                 // Define Bullet
+                bulletData.activator = NetworkClient.ClientID;
                 bulletData.position.x = bulletSpawnPoint.position.x.TwoDecimals().ToString();
                 bulletData.position.y = bulletSpawnPoint.position.y.TwoDecimals().ToString();
                 bulletData.direction.x = bulletSpawnPoint.up.x.ToString();

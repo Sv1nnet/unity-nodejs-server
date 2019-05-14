@@ -5,7 +5,9 @@ module.exports = class Bullet extends ServerObject {
   constructor() {
     super();
     this.direction = new Vector2();
-    this.speed = 0.5;
+    this.speed = 1;
+    this.isDestroyed = false;
+    this.activator = '';
   }
 
   onUpdate() {
@@ -17,6 +19,6 @@ module.exports = class Bullet extends ServerObject {
     this.position.x = (posX + (dirX * this.speed)).toString().replace('.', ',');
     this.position.y = (posY + (dirY * this.speed)).toString().replace('.', ',');
 
-    return false;
+    return this.isDestroyed;
   }
 };

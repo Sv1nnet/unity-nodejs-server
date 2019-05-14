@@ -6,6 +6,8 @@ using System;
 using Project.Utility;
 using Project.Player;
 using Project.Scriptable;
+using Project.Gameplay;
+using Project.MovementInterpolation;
 
 namespace Project.Networking
 {
@@ -87,9 +89,17 @@ namespace Project.Networking
 
                 float x = float.Parse(E.data["position"]["x"].str);
                 float y = float.Parse(E.data["position"]["y"].str);
-                
+
                 NetworkIdentity ni = serverObjects[id];
-                ni.transform.position = new Vector3(x, y, 0);
+                //ni.transform.position = new Vector3(x, y, 0);
+                if (serverObjects[id].name == "Bullet(Clone)")
+                {
+                    ni.gameObject.GetComponent<MoveBulletInterpolation>().Target = new Vector3(x, y, 0);
+                }
+                else
+                {
+                    ni.transform.position = new Vector3(x, y, 0);
+                }
             });
 
             On("updateRotation", (E) =>
@@ -124,15 +134,18 @@ namespace Project.Networking
                     ni.SetSocketReference(this);
 
                     // if bulllet apply direction as well
-                    if(name == "Bullet")
+                    if (name == "Bullet")
                     {
                         float directionX = float.Parse(E.data["direction"]["x"].str);
                         float directionY = float.Parse(E.data["direction"]["y"].str);
+                        string activator = E.data["activator"].str.RemoveQuotes();
 
                         float rot = Mathf.Atan2(directionY, directionX) * Mathf.Rad2Deg;
                         Vector3 currentRotation = new Vector3(0, 0, rot - 90);
-                        print(currentRotation.z);
                         spawnedObject.transform.rotation = Quaternion.Euler(currentRotation);
+
+                        WhoActivatedMe whoActivatedMe = spawnedObject.GetComponent<WhoActivatedMe>();
+                        whoActivatedMe.SetActivator(activator);
                     }
 
                     serverObjects.Add(id, ni);
@@ -147,16 +160,36 @@ namespace Project.Networking
                 serverObjects.Remove(id);
                 DestroyImmediate(ni.gameObject);
             });
+
+            On("playerDied", (E) =>
+            {
+                string id = E.data["id"].ToString().RemoveQuotes();
+
+                NetworkIdentity ni = serverObjects[id];
+                ni.gameObject.SetActive(false);
+            });
+
+            On("playerRespawn", (E) =>
+            {
+                string id = E.data["id"].ToString().RemoveQuotes();
+                float x = float.Parse(E.data["position"]["x"].str);
+                float y = float.Parse(E.data["position"]["y"].str);
+
+                NetworkIdentity ni = serverObjects[id];
+                ni.transform.position = new Vector3(x, y, 0);
+                ni.gameObject.SetActive(true);
+
+            });
         }
     }
-    
+
     [Serializable]
     public class Player
     {
         public string id;
         public Position position;
     }
-    
+
     [Serializable]
     public class Position
     {
@@ -190,7 +223,14 @@ namespace Project.Networking
             this.direction = new Position();
         }
         public string id;
+        public string activator;
         public Position position;
         public Position direction;
+    }
+
+    [Serializable]
+    public class IDData
+    {
+        public string id;
     }
 }

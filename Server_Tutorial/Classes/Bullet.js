@@ -5,16 +5,16 @@ module.exports = class Bullet extends ServerObject {
   constructor() {
     super();
     this.direction = new Vector2();
-    this.speed = 1;
+    this.speed = '0,5';
     this.isDestroyed = false;
     this.activator = '';
   }
 
   onUpdate() {
-    let posX = parseFloat(this.position.x.replace(',', '.'));
-    let posY = parseFloat(this.position.y.replace(',', '.'));
-    let dirX = parseFloat(this.direction.x.replace(',', '.'));
-    let dirY = parseFloat(this.direction.y.replace(',', '.'));
+    const posX = parseFloat(this.position.x.replace(',', '.'));
+    const posY = parseFloat(this.position.y.replace(',', '.'));
+    const dirX = parseFloat(this.direction.x.replace(',', '.'));
+    const dirY = parseFloat(this.direction.y.replace(',', '.'));
 
     this.position.x = (posX + (dirX * this.speed)).toString().replace('.', ',');
     this.position.y = (posY + (dirY * this.speed)).toString().replace('.', ',');

@@ -13,6 +13,8 @@ namespace Project.Networking
 {
     public class NetworkClient : SocketIOComponent
     {
+        public const float SERVER_UPDATE_TIME = 10;
+
         [Header("Network Client")]
         [SerializeField]
         private Transform networkContainer;
@@ -91,15 +93,7 @@ namespace Project.Networking
                 float y = float.Parse(E.data["position"]["y"].str);
 
                 NetworkIdentity ni = serverObjects[id];
-                //ni.transform.position = new Vector3(x, y, 0);
-                if (serverObjects[id].name == "Bullet(Clone)")
-                {
-                    ni.gameObject.GetComponent<MoveBulletInterpolation>().Target = new Vector3(x, y, 0);
-                }
-                else
-                {
-                    ni.transform.position = new Vector3(x, y, 0);
-                }
+                ni.transform.position = new Vector3(x, y, 0);
             });
 
             On("updateRotation", (E) =>
@@ -139,13 +133,19 @@ namespace Project.Networking
                         float directionX = float.Parse(E.data["direction"]["x"].str);
                         float directionY = float.Parse(E.data["direction"]["y"].str);
                         string activator = E.data["activator"].str.RemoveQuotes();
+                        float speed = float.Parse(E.data["speed"].str);
 
+                        print("speed: " + speed);
                         float rot = Mathf.Atan2(directionY, directionX) * Mathf.Rad2Deg;
                         Vector3 currentRotation = new Vector3(0, 0, rot - 90);
                         spawnedObject.transform.rotation = Quaternion.Euler(currentRotation);
 
                         WhoActivatedMe whoActivatedMe = spawnedObject.GetComponent<WhoActivatedMe>();
                         whoActivatedMe.SetActivator(activator);
+
+                        Projectile projectile = spawnedObject.GetComponent<Projectile>();
+                        projectile.Direction = new Vector2(directionX, directionY);
+                        projectile.Speed = speed;
                     }
 
                     serverObjects.Add(id, ni);
@@ -180,6 +180,11 @@ namespace Project.Networking
                 ni.gameObject.SetActive(true);
 
             });
+        }
+
+        public void AttemptToJoinLobby()
+        {
+            Emit("joinGame");
         }
     }
 

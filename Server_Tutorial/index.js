@@ -1,15 +1,30 @@
+/* eslint-disable spaced-comment */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable guard-for-in */
 /* eslint-disable no-param-reassign */
 const io = require('socket.io')(process.env.PORT || 52300);
+const Server = require('./Classes/Server');
 
-// Custom classes
+/*// Custom classes
 const Player = require('./Classes/Player');
-const Bullet = require('./Classes/Bullet');
+const Bullet = require('./Classes/Bullet');*/
 
 console.log('Server has started on port', process.env.PORT || 52300);
 
-const players = [];
+const server = new Server();
+
+setInterval(() => {
+  server.onUpdate();
+}, 100, 0);
+
+io.on('connection', (socket) => {
+  const connection = server.onConnected(socket);
+
+  connection.createEvents();
+  connection.socket.emit('register', { id: connection.player.id })
+});
+
+/*const players = [];
 const sockets = [];
 const bullets = [];
 
@@ -182,7 +197,7 @@ io.on('connection', (socket) => {
     delete sockets[thisPlayerID];
     socket.broadcast.emit('disconnected', player);
   });
-});
+});*/
 
 function interval(func, wait, times) {
   const interv = (function interv(w, t) {
